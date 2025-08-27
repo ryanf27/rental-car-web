@@ -14,7 +14,114 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bookings: {
+        Row: {
+          car_id: number
+          created_at: string | null
+          end_date: string
+          id: number
+          start_date: string
+          status: Database["public"]["Enums"]["booking_status"]
+          total_price: number
+          user_id: string
+        }
+        Insert: {
+          car_id: number
+          created_at?: string | null
+          end_date: string
+          id?: never
+          start_date: string
+          status?: Database["public"]["Enums"]["booking_status"]
+          total_price: number
+          user_id: string
+        }
+        Update: {
+          car_id?: number
+          created_at?: string | null
+          end_date?: string
+          id?: never
+          start_date?: string
+          status?: Database["public"]["Enums"]["booking_status"]
+          total_price?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_car_id_fkey"
+            columns: ["car_id"]
+            isOneToOne: false
+            referencedRelation: "cars"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cars: {
+        Row: {
+          brand: string
+          created_at: string | null
+          id: number
+          images: Json | null
+          model: string
+          price_per_day: number
+          seats: number
+          status: Database["public"]["Enums"]["car_status"]
+          transmission: Database["public"]["Enums"]["car_transmission"]
+          year: number
+        }
+        Insert: {
+          brand: string
+          created_at?: string | null
+          id?: never
+          images?: Json | null
+          model: string
+          price_per_day: number
+          seats: number
+          status?: Database["public"]["Enums"]["car_status"]
+          transmission: Database["public"]["Enums"]["car_transmission"]
+          year: number
+        }
+        Update: {
+          brand?: string
+          created_at?: string | null
+          id?: never
+          images?: Json | null
+          model?: string
+          price_per_day?: number
+          seats?: number
+          status?: Database["public"]["Enums"]["car_status"]
+          transmission?: Database["public"]["Enums"]["car_transmission"]
+          year?: number
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          full_name: string
+          id: string
+          phone_number: string | null
+          role: Database["public"]["Enums"]["user_role"]
+        }
+        Insert: {
+          full_name: string
+          id: string
+          phone_number?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+        }
+        Update: {
+          full_name?: string
+          id?: string
+          phone_number?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +130,14 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      booking_status:
+        | "pending_payment"
+        | "confirmed"
+        | "completed"
+        | "cancelled"
+      car_status: "available" | "rented" | "maintenance"
+      car_transmission: "manual" | "automatic"
+      user_role: "customer" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +264,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      booking_status: [
+        "pending_payment",
+        "confirmed",
+        "completed",
+        "cancelled",
+      ],
+      car_status: ["available", "rented", "maintenance"],
+      car_transmission: ["manual", "automatic"],
+      user_role: ["customer", "admin"],
+    },
   },
 } as const
