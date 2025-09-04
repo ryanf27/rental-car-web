@@ -37,10 +37,16 @@ All colors MUST be HSL.
     --ring: 214 84% 56%;
 
     /* Custom design tokens */
-    --gradient-hero: linear-gradient(135deg, hsl(214 84% 56%), hsl(234 84% 66%));
+    --gradient-hero: linear-gradient(135deg, hsl(214 84% 56%), hsl(234 84% 66%), hsl(254 84% 76%));
     --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(210 40% 98%));
+    --gradient-mesh: conic-gradient(from 0deg at 50% 50%, hsl(214 84% 56% / 0.1), hsl(234 84% 66% / 0.1), hsl(254 84% 76% / 0.1), hsl(214 84% 56% / 0.1));
     --shadow-elegant: 0 10px 25px -5px hsl(214 84% 56% / 0.1);
     --shadow-hover: 0 20px 40px -10px hsl(214 84% 56% / 0.15);
+    --shadow-glow: 0 0 60px -10px hsl(214 84% 56% / 0.3);
+    
+    /* Animation variables */
+    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
     --radius: 0.5rem;
 
