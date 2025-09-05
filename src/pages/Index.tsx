@@ -1,311 +1,388 @@
-import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { motion, useScroll, useTransform, useInView } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
-import { Scene3D } from "@/components/3d/Scene3D";
-import { Car, Shield, Clock, Star, ArrowRight, CheckCircle } from "lucide-react";
+import { useState, useEffect, useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { Car, Zap, Shield, Star, ArrowRight, MapPin, Calendar, Users } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { StudioScene3D } from '@/components/3d/StudioScene3D';
+import { useScrollAnimation, prefersReducedMotion } from '@/lib/motion';
+import Lenis from 'lenis';
 
-const Index = () => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const [start, setStart] = useState<string>("");
-  const [end, setEnd] = useState<string>("");
-  
-  const containerRef = useRef<HTMLDivElement>(null);
-  const heroRef = useRef<HTMLDivElement>(null);
-  const featuresRef = useRef<HTMLDivElement>(null);
-  const statsRef = useRef<HTMLDivElement>(null);
+export default function Index() {
+  const [mounted, setMounted] = useState(false);
+  const heroRef = useRef<HTMLElement>(null);
+  const featuresRef = useRef<HTMLElement>(null);
+  const carsRef = useRef<HTMLElement>(null);
   
   const { scrollYProgress } = useScroll();
-  const y1 = useTransform(scrollYProgress, [0, 1], [0, -50]);
-  const y2 = useTransform(scrollYProgress, [0, 1], [0, -100]);
+  const heroParallaxY = useTransform(scrollYProgress, [0, 0.4], [0, -80]);
+  const heroRotateY = useTransform(scrollYProgress, [0.1, 0.9], [-0.05, 0.05]);
   
-  const heroInView = useInView(heroRef, { once: true, margin: "-100px" });
-  const featuresInView = useInView(featuresRef, { once: true, margin: "-100px" });
-  const statsInView = useInView(statsRef, { once: true, margin: "-100px" });
+  // Initialize smooth scrolling
+  useEffect(() => {
+    if (prefersReducedMotion()) return;
+    
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    });
 
-  const onSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!start || !end) {
-      toast({ title: "Dates required", description: "Please select start and end dates." });
-      return;
+    function raf(time: number) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
     }
-    if (end < start) {
-      toast({ title: "Invalid range", description: "End date must be after start date." });
-      return;
+
+    requestAnimationFrame(raf);
+    setMounted(true);
+
+    return () => lenis.destroy();
+  }, []);
+
+  // Scroll animations
+  useScrollAnimation(featuresRef, { threshold: 0.2 });
+  useScrollAnimation(carsRef, { threshold: 0.1 });
+
+  const features = [
+    {
+      icon: Zap,
+      title: "Instant Booking",
+      description: "Book your perfect car in seconds with our streamlined process",
+      badge: "Fast"
+    },
+    {
+      icon: Shield,
+      title: "Fully Insured",
+      description: "All vehicles come with comprehensive insurance coverage",
+      badge: "Secure"
+    },
+    {
+      icon: Star,
+      title: "Premium Fleet",
+      description: "Choose from luxury sedans, SUVs, and sports cars",
+      badge: "Quality"
     }
-    const params = new URLSearchParams({ start, end }).toString();
-    navigate(`/search?${params}`);
-  };
+  ];
 
-  const today = new Date().toISOString().split("T")[0];
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
-      },
+  const cars = [
+    {
+      name: "BMW 5 Series",
+      category: "Executive Sedan",
+      price: "€89",
+      image: "🚗",
+      features: ["Leather Interior", "Navigation", "Premium Audio"],
+      rating: 4.9
     },
-  };
-
-  const itemVariants = {
-    hidden: { y: 30, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        duration: 0.8,
-        ease: [0.22, 1, 0.36, 1],
-      },
+    {
+      name: "Audi Q7",
+      category: "Luxury SUV", 
+      price: "€129",
+      image: "🚙",
+      features: ["7 Seats", "Panoramic Roof", "Quattro AWD"],
+      rating: 4.8
     },
-  };
+    {
+      name: "Mercedes C-Class",
+      category: "Business Class",
+      price: "€79",
+      image: "🚘",
+      features: ["AMG Package", "Wireless Charging", "Driver Assist"],
+      rating: 4.7
+    }
+  ];
 
   return (
-    <div ref={containerRef} className="relative min-h-screen overflow-hidden">
-      {/* Animated Background */}
-      <div className="fixed inset-0 bg-gradient-to-br from-background via-background to-primary/5">
-        <motion.div 
-          style={{ y: y1 }}
-          className="absolute inset-0 opacity-30"
-        >
-          <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
-          <div className="absolute top-40 right-20 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-20 left-1/2 w-80 h-80 bg-secondary/10 rounded-full blur-3xl" />
-        </motion.div>
-      </div>
-
-      {/* Navigation */}
-      <motion.header 
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="relative z-50 w-full border-b border-border/20 bg-background/80 backdrop-blur-md"
+    <div className="min-h-screen bg-background text-foreground font-[Inter]">
+      {/* Hero Section */}
+      <motion.section 
+        ref={heroRef}
+        className="relative min-h-screen flex items-center overflow-hidden"
+        style={{ 
+          background: 'var(--gradient-hero)',
+        }}
       >
-        <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
-          <motion.a 
-            href="/" 
-            className="font-bold text-2xl bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
-            whileHover={{ scale: 1.05 }}
-            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+        {/* 3D Car Scene */}
+        <motion.div 
+          className="absolute inset-0 z-10"
+          style={{ 
+            y: heroParallaxY,
+            rotateY: heroRotateY 
+          }}
+        >
+          <StudioScene3D className="w-full h-full" />
+        </motion.div>
+        
+        {/* Hero Content */}
+        <div className="relative z-20 container mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
+          <motion.div 
+            className="space-y-8"
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
           >
-            DriveEase
-          </motion.a>
-          <nav className="hidden md:flex space-x-8">
-            <a href="#features" className="text-muted-foreground hover:text-primary transition-colors">Features</a>
-            <a href="#fleet" className="text-muted-foreground hover:text-primary transition-colors">Fleet</a>
-            <a href="#contact" className="text-muted-foreground hover:text-primary transition-colors">Contact</a>
-          </nav>
-        </div>
-      </motion.header>
-
-      <main className="relative z-10">
-        {/* Hero Section */}
-        <section ref={heroRef} className="relative min-h-screen flex items-center overflow-hidden">
-          <div className="mx-auto max-w-6xl px-6 py-20 grid lg:grid-cols-2 gap-12 items-center">
-            {/* Hero Content */}
-            <motion.div 
-              variants={containerVariants}
-              initial="hidden"
-              animate={heroInView ? "visible" : "hidden"}
-              className="space-y-8"
-            >
-              <motion.div variants={itemVariants} className="space-y-6">
-                <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-none">
-                  <span className="block bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
-                    Premium Cars
-                  </span>
-                  <span className="block text-foreground mt-2">
-                    For Every Journey
-                  </span>
-                </h1>
-                <p className="text-xl text-muted-foreground max-w-lg leading-relaxed">
-                  Experience luxury and comfort with our curated collection of premium vehicles. 
-                  From elegant sedans to powerful SUVs.
-                </p>
-              </motion.div>
-
-              <motion.div variants={itemVariants} className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                  <CheckCircle className="w-4 h-4 text-green-500" />
-                  <span>Instant Booking</span>
-                </div>
-                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                  <CheckCircle className="w-4 h-4 text-green-500" />
-                  <span>24/7 Support</span>
-                </div>
-                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                  <CheckCircle className="w-4 h-4 text-green-500" />
-                  <span>Best Price Guarantee</span>
-                </div>
-              </motion.div>
-
-              {/* Enhanced Search Form */}
-              <motion.div variants={itemVariants}>
-                <form onSubmit={onSubmit} className="bg-card/90 backdrop-blur-sm border border-border/50 p-6 rounded-2xl shadow-2xl">
-                  <div className="grid gap-4 md:grid-cols-3 items-end">
-                    <div className="space-y-2">
-                      <label htmlFor="start" className="block text-sm font-medium text-foreground">Pickup Date</label>
-                      <Input 
-                        id="start" 
-                        type="date" 
-                        min={today} 
-                        value={start} 
-                        onChange={(e) => setStart(e.target.value)} 
-                        className="h-11 border-border/60 focus:border-primary transition-colors"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label htmlFor="end" className="block text-sm font-medium text-foreground">Return Date</label>
-                      <Input 
-                        id="end" 
-                        type="date" 
-                        min={start || today} 
-                        value={end} 
-                        onChange={(e) => setEnd(e.target.value)} 
-                        className="h-11 border-border/60 focus:border-primary transition-colors"
-                      />
-                    </div>
-                    <Button 
-                      type="submit" 
-                      className="h-11 font-semibold px-6 bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-200 group"
-                    >
-                      Find Cars
-                      <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </div>
-                </form>
-              </motion.div>
-            </motion.div>
-
-            {/* 3D Car Scene */}
-            <motion.div
-              initial={{ x: 100, opacity: 0 }}
-              animate={heroInView ? { x: 0, opacity: 1 } : { x: 100, opacity: 0 }}
-              transition={{ duration: 1, ease: "easeOut", delay: 0.3 }}
-              className="relative h-[500px] lg:h-[600px]"
-            >
-              <Scene3D className="absolute inset-0" />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent pointer-events-none" />
-            </motion.div>
-          </div>
-        </section>
-
-        {/* Stats Section */}
-        <section ref={statsRef} className="py-20 bg-background/50 backdrop-blur-sm">
-          <div className="mx-auto max-w-6xl px-6">
-            <motion.div 
-              variants={containerVariants}
-              initial="hidden"
-              animate={statsInView ? "visible" : "hidden"}
-              className="grid grid-cols-2 md:grid-cols-4 gap-8"
-            >
-              {[
-                { number: "10K+", label: "Happy Customers" },
-                { number: "500+", label: "Premium Cars" },
-                { number: "50+", label: "Cities Covered" },
-                { number: "24/7", label: "Support Available" },
-              ].map((stat, index) => (
-                <motion.div key={index} variants={itemVariants} className="text-center">
-                  <div className="text-3xl md:text-4xl font-bold text-primary mb-2">{stat.number}</div>
-                  <div className="text-muted-foreground">{stat.label}</div>
-                </motion.div>
-              ))}
-            </motion.div>
-          </div>
-        </section>
-
-        {/* Features Section */}
-        <section ref={featuresRef} id="features" className="py-20">
-          <div className="mx-auto max-w-6xl px-6">
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              animate={featuresInView ? "visible" : "hidden"}
-              className="text-center mb-16"
-            >
-              <motion.h2 variants={itemVariants} className="text-4xl font-bold mb-4">
-                Why Choose DriveEase
-              </motion.h2>
-              <motion.p variants={itemVariants} className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Experience the difference with our premium service and attention to detail
-              </motion.p>
-            </motion.div>
-
-            <motion.div 
-              variants={containerVariants}
-              initial="hidden"
-              animate={featuresInView ? "visible" : "hidden"}
-              className="grid md:grid-cols-3 gap-8"
-            >
-              {[
-                {
-                  icon: Car,
-                  title: "Premium Fleet",
-                  description: "Luxury vehicles maintained to the highest standards with regular safety checks and premium amenities."
-                },
-                {
-                  icon: Shield,
-                  title: "Full Insurance",
-                  description: "Comprehensive coverage included with every rental for your peace of mind and protection."
-                },
-                {
-                  icon: Clock,
-                  title: "24/7 Service",
-                  description: "Round-the-clock customer support and roadside assistance whenever you need it."
-                }
-              ].map((feature, index) => (
-                <motion.div
-                  key={index}
-                  variants={itemVariants}
-                  className="group p-8 rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300"
-                  whileHover={{ y: -5 }}
-                >
-                  <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-primary/20 transition-colors">
-                    <feature.icon className="w-8 h-8 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-4 text-center">{feature.title}</h3>
-                  <p className="text-muted-foreground text-center leading-relaxed">{feature.description}</p>
-                </motion.div>
-              ))}
-            </motion.div>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="py-20 bg-gradient-to-r from-primary via-primary to-accent">
-          <div className="mx-auto max-w-4xl px-6 text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-              className="text-white space-y-6"
-            >
-              <h2 className="text-4xl md:text-5xl font-bold mb-4">
-                Ready to Drive?
-              </h2>
-              <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-                Join thousands of satisfied customers who trust DriveEase for their car rental needs.
+            <div className="space-y-4">
+              <Badge 
+                variant="secondary" 
+                className="bg-white/5 text-foreground border-border/20 backdrop-blur-sm"
+              >
+                <Car className="w-4 h-4 mr-2" />
+                Premium Car Rental
+              </Badge>
+              
+              <h1 className="text-5xl lg:text-7xl font-bold tracking-tight">
+                Drive
+                <span className="block text-transparent bg-gradient-to-r from-primary via-accent to-primary bg-clip-text">
+                  Excellence
+                </span>
+              </h1>
+              
+              <p className="text-xl text-secondary-foreground leading-relaxed max-w-lg">
+                Experience luxury on every journey. Premium vehicles, professional service, 
+                and seamless booking for discerning travelers.
               </p>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-4">
               <Button 
                 size="lg" 
-                className="bg-white text-primary hover:bg-white/90 text-lg px-8 py-4 shadow-xl hover:shadow-2xl transition-all duration-200"
-                onClick={() => document.querySelector('form')?.scrollIntoView({ behavior: 'smooth' })}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-[0.9rem] px-8 py-6 text-lg font-medium transition-all duration-200 hover:scale-[1.02] hover:shadow-elegant"
               >
-                Start Your Journey
-                <ArrowRight className="w-5 h-5 ml-2" />
+                Book Now
+                <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
-            </motion.div>
+              
+              <Button 
+                variant="outline" 
+                size="lg"
+                className="bg-white/5 border-border/30 backdrop-blur-sm hover:bg-white/10 rounded-[0.9rem] px-8 py-6 text-lg"
+              >
+                View Fleet
+              </Button>
+            </div>
+            
+            {/* Stats */}
+            <div className="flex items-center gap-8 pt-8">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary">500+</div>
+                <div className="text-sm text-secondary-foreground">Premium Cars</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary">50K+</div>
+                <div className="text-sm text-secondary-foreground">Happy Clients</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary">4.9</div>
+                <div className="text-sm text-secondary-foreground">Rating</div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+        
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-transparent to-background/20 z-15" />
+      </motion.section>
+
+      {/* Features Section */}
+      <section ref={featuresRef} className="py-24 relative">
+        <div className="container mx-auto px-6">
+          <motion.div 
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-4xl lg:text-5xl font-bold mb-6">
+              Why Choose DriveEase
+            </h2>
+            <p className="text-xl text-secondary-foreground max-w-2xl mx-auto">
+              Premium car rental with unmatched service quality and attention to detail
+            </p>
+          </motion.div>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ 
+                  duration: 0.6, 
+                  delay: index * 0.1,
+                  ease: "easeOut"
+                }}
+                viewport={{ once: true }}
+                whileHover={{ y: -4, scale: 1.02 }}
+                className="group"
+              >
+                <Card className="h-full bg-card/50 backdrop-blur-sm border-border/30 rounded-[1.25rem] shadow-elegant hover:shadow-hover transition-all duration-300">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-3 bg-primary/10 rounded-2xl group-hover:bg-primary/20 transition-colors">
+                        <feature.icon className="w-6 h-6 text-primary" />
+                      </div>
+                      <Badge 
+                        variant="secondary"
+                        className="bg-white/5 text-accent border-border/20"
+                      >
+                        {feature.badge}
+                      </Badge>
+                    </div>
+                    <CardTitle className="text-xl font-semibold">{feature.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="text-secondary-foreground leading-relaxed">
+                      {feature.description}
+                    </CardDescription>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
           </div>
-        </section>
-      </main>
+        </div>
+      </section>
+
+      {/* Cars Section */}
+      <section ref={carsRef} className="py-24 bg-secondary/20">
+        <div className="container mx-auto px-6">
+          <motion.div 
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-4xl lg:text-5xl font-bold mb-6">
+              Premium Fleet
+            </h2>
+            <p className="text-xl text-secondary-foreground max-w-2xl mx-auto">
+              Handpicked luxury vehicles for the ultimate driving experience
+            </p>
+          </motion.div>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            {cars.map((car, index) => (
+              <motion.div
+                key={car.name}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ 
+                  duration: 0.7, 
+                  delay: index * 0.1,
+                  ease: "easeOut"
+                }}
+                viewport={{ once: true }}
+                whileHover={{ y: -6, scale: 1.02 }}
+                className="group"
+              >
+                <Card className="overflow-hidden bg-card/70 backdrop-blur-sm border-border/30 rounded-[1.25rem] shadow-elegant hover:shadow-hover transition-all duration-300">
+                  <div className="aspect-video bg-gradient-to-br from-secondary via-card to-secondary/50 flex items-center justify-center text-6xl">
+                    {car.image}
+                  </div>
+                  
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-xl font-semibold">{car.name}</CardTitle>
+                      <div className="flex items-center gap-1">
+                        <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                        <span className="text-sm font-medium">{car.rating}</span>
+                      </div>
+                    </div>
+                    <CardDescription className="text-secondary-foreground">
+                      {car.category}
+                    </CardDescription>
+                  </CardHeader>
+                  
+                  <CardContent className="space-y-4">
+                    <div className="flex flex-wrap gap-2">
+                      {car.features.map((feature) => (
+                        <Badge 
+                          key={feature}
+                          variant="secondary"
+                          className="bg-white/5 text-accent border-border/20 text-xs"
+                        >
+                          {feature}
+                        </Badge>
+                      ))}
+                    </div>
+                    
+                    <div className="flex items-center justify-between pt-4">
+                      <div className="text-2xl font-bold text-primary">
+                        {car.price}
+                        <span className="text-sm font-normal text-secondary-foreground">/day</span>
+                      </div>
+                      <Button 
+                        size="sm"
+                        className="bg-primary hover:bg-primary/90 rounded-lg transition-all hover:scale-105"
+                      >
+                        Book Now
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-16 bg-card/30 backdrop-blur-sm border-t border-border/30">
+        <div className="container mx-auto px-6">
+          <div className="grid md:grid-cols-4 gap-8">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <Car className="w-8 h-8 text-primary" />
+                <span className="text-2xl font-bold">DriveEase</span>
+              </div>
+              <p className="text-secondary-foreground">
+                Premium car rental service for discerning travelers worldwide.
+              </p>
+            </div>
+            
+            <div className="space-y-3">
+              <h4 className="font-semibold">Services</h4>
+              <div className="space-y-2 text-secondary-foreground">
+                <div>Luxury Cars</div>
+                <div>Business Rental</div>
+                <div>Airport Transfer</div>
+                <div>Chauffeur Service</div>
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <h4 className="font-semibold">Support</h4>
+              <div className="space-y-2 text-secondary-foreground">
+                <div>Help Center</div>
+                <div>Contact Us</div>
+                <div>Terms of Service</div>
+                <div>Privacy Policy</div>
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <h4 className="font-semibold">Contact</h4>
+              <div className="space-y-2 text-secondary-foreground">
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4" />
+                  <span>Global Service</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  <span>24/7 Available</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  <span>Premium Support</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="mt-12 pt-8 border-t border-border/30 text-center text-secondary-foreground">
+            <p>&copy; 2024 DriveEase. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
-};
-
-export default Index;
+}
