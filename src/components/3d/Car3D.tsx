@@ -29,12 +29,12 @@ export function Car3D() {
       <mesh position={[0, 0.4, 0]} castShadow receiveShadow>
         <boxGeometry args={[3.2, 0.6, 1.4]} />
         <meshPhysicalMaterial 
-          color="#2563eb" 
-          metalness={0.9}
-          roughness={0.1}
+          color="#1f2937" 
+          metalness={0.95}
+          roughness={0.05}
           clearcoat={1}
-          clearcoatRoughness={0.1}
-          reflectivity={0.9}
+          clearcoatRoughness={0.02}
+          reflectivity={0.95}
         />
       </mesh>
       
@@ -42,10 +42,10 @@ export function Car3D() {
       <mesh position={[0, 0.15, 0]} castShadow receiveShadow>
         <boxGeometry args={[3.4, 0.3, 1.6]} />
         <meshPhysicalMaterial 
-          color="#1d4ed8" 
-          metalness={0.8}
-          roughness={0.15}
-          clearcoat={0.8}
+          color="#111827" 
+          metalness={0.9}
+          roughness={0.08}
+          clearcoat={0.9}
         />
       </mesh>
       
@@ -53,11 +53,11 @@ export function Car3D() {
       <mesh position={[0, 0.85, 0]} scale={[0.75, 0.5, 0.85]} castShadow>
         <sphereGeometry args={[1.8, 16, 8]} />
         <meshPhysicalMaterial 
-          color="#1e40af" 
-          metalness={0.95}
-          roughness={0.05}
+          color="#374151" 
+          metalness={0.98}
+          roughness={0.02}
           clearcoat={1}
-          clearcoatRoughness={0.05}
+          clearcoatRoughness={0.01}
         />
       </mesh>
       
@@ -148,8 +148,8 @@ export function Car3D() {
         <sphereGeometry args={[0.12]} />
         <meshPhysicalMaterial 
           color="#ffffff" 
-          emissive="#4fc3f7" 
-          emissiveIntensity={0.6}
+          emissive="#e5e7eb" 
+          emissiveIntensity={0.8}
           metalness={0.1}
           roughness={0}
         />
@@ -158,8 +158,8 @@ export function Car3D() {
         <sphereGeometry args={[0.12]} />
         <meshPhysicalMaterial 
           color="#ffffff" 
-          emissive="#4fc3f7" 
-          emissiveIntensity={0.6}
+          emissive="#e5e7eb" 
+          emissiveIntensity={0.8}
           metalness={0.1}
           roughness={0}
         />
@@ -169,9 +169,9 @@ export function Car3D() {
       <mesh position={[1.6, 0.25, 0]}>
         <boxGeometry args={[0.02, 0.05, 0.8]} />
         <meshPhysicalMaterial 
-          color="#00e5ff" 
-          emissive="#00e5ff" 
-          emissiveIntensity={0.4}
+          color="#f9fafb" 
+          emissive="#f9fafb" 
+          emissiveIntensity={0.6}
         />
       </mesh>
       

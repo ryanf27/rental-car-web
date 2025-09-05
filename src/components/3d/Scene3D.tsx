@@ -37,14 +37,14 @@ export function Scene3D({ className = "" }: Scene3DProps) {
         <directionalLight 
           position={[-5, 5, -5]} 
           intensity={0.4}
-          color="#4fc3f7"
+          color="#f9fafb"
         />
         
         {/* Rim Light */}
         <pointLight 
           position={[0, 8, -8]} 
           intensity={0.6}
-          color="#00e5ff"
+          color="#e5e7eb"
           distance={20}
         />
         
@@ -52,13 +52,13 @@ export function Scene3D({ className = "" }: Scene3DProps) {
         <pointLight 
           position={[5, 1, 5]} 
           intensity={0.3}
-          color="#2563eb"
+          color="#6b7280"
           distance={10}
         />
         <pointLight 
           position={[-5, 1, -5]} 
           intensity={0.3}
-          color="#1e40af"
+          color="#4b5563"
           distance={10}
         />
         
