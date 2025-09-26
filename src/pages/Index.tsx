@@ -1,18 +1,34 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { Car, Zap, Shield, Star, ArrowRight, MapPin, Calendar, Users } from 'lucide-react';
+import { Car as CarIcon, Zap, Shield, Star, ArrowRight, MapPin, Calendar, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { StudioScene3D } from '@/components/3d/StudioScene3D';
+import { CarFilters } from '@/components/search/CarFilters';
+import { CarGrid, type Car } from '@/components/search/CarGrid';
 import { useScrollAnimation, prefersReducedMotion } from '@/lib/motion';
 import Lenis from 'lenis';
+import heroCarImage from '@/assets/hero-car.jpg';
+import bmw5SeriesImage from '@/assets/bmw-5-series.jpg';
+import audiQ7Image from '@/assets/audi-q7.jpg';
+import mercedesCClassImage from '@/assets/mercedes-c-class.jpg';
+import audiA4Image from '@/assets/audi-a4.jpg';
+import bmwX5Image from '@/assets/bmw-x5.jpg';
+import mercedesEClassImage from '@/assets/mercedes-e-class.jpg';
 
 export default function Index() {
   const [mounted, setMounted] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
   const featuresRef = useRef<HTMLElement>(null);
   const carsRef = useRef<HTMLElement>(null);
+  
+  // Search and filter states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [brandFilter, setBrandFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [seatsFilter, setSeatsFilter] = useState('all');
+  const [colorFilter, setColorFilter] = useState('all');
+  const [priceRange, setPriceRange] = useState('all');
   
   const { scrollYProgress } = useScroll();
   const heroParallaxY = useTransform(scrollYProgress, [0, 0.4], [0, -80]);
@@ -63,32 +79,141 @@ export default function Index() {
     }
   ];
 
-  const cars = [
+  const allCars: Car[] = [
     {
+      id: '1',
       name: "BMW 5 Series",
+      brand: "BMW",
       category: "Executive Sedan",
-      price: "€89",
-      image: "🚗",
-      features: ["Leather Interior", "Navigation", "Premium Audio"],
-      rating: 4.9
+      type: "Sedan",
+      price: 89,
+      image: bmw5SeriesImage,
+      features: ["Leather Interior", "Navigation", "Premium Audio", "Heated Seats"],
+      rating: 4.9,
+      seats: 5,
+      color: "Silver",
+      transmission: "Automatic",
+      fuelType: "Petrol",
+      year: 2024,
+      available: true
     },
     {
+      id: '2',
       name: "Audi Q7",
+      brand: "Audi",
       category: "Luxury SUV", 
-      price: "€129",
-      image: "🚙",
-      features: ["7 Seats", "Panoramic Roof", "Quattro AWD"],
-      rating: 4.8
+      type: "SUV",
+      price: 129,
+      image: audiQ7Image,
+      features: ["7 Seats", "Panoramic Roof", "Quattro AWD", "Premium Sound"],
+      rating: 4.8,
+      seats: 7,
+      color: "White",
+      transmission: "Automatic",
+      fuelType: "Diesel",
+      year: 2024,
+      available: true
     },
     {
+      id: '3',
       name: "Mercedes C-Class",
+      brand: "Mercedes",
       category: "Business Class",
-      price: "€79",
-      image: "🚘",
-      features: ["AMG Package", "Wireless Charging", "Driver Assist"],
-      rating: 4.7
+      type: "Sedan",
+      price: 79,
+      image: mercedesCClassImage,
+      features: ["AMG Package", "Wireless Charging", "Driver Assist", "Ambient Lighting"],
+      rating: 4.7,
+      seats: 5,
+      color: "Blue",
+      transmission: "Automatic",
+      fuelType: "Petrol",
+      year: 2024,
+      available: false
+    },
+    {
+      id: '4',
+      name: "Audi A4",
+      brand: "Audi",
+      category: "Premium Sedan",
+      type: "Sedan",
+      price: 75,
+      image: audiA4Image,
+      features: ["Virtual Cockpit", "Matrix LED", "Sport Suspension", "Bang & Olufsen"],
+      rating: 4.6,
+      seats: 5,
+      color: "Black",
+      transmission: "Automatic",
+      fuelType: "Petrol",
+      year: 2024,
+      available: true
+    },
+    {
+      id: '5',
+      name: "BMW X5",
+      brand: "BMW",
+      category: "Luxury SUV",
+      type: "SUV",
+      price: 145,
+      image: bmwX5Image,
+      features: ["xDrive AWD", "Panoramic Roof", "Harman Kardon", "Gesture Control"],
+      rating: 4.8,
+      seats: 7,
+      color: "White",
+      transmission: "Automatic",
+      fuelType: "Hybrid",
+      year: 2024,
+      available: true
+    },
+    {
+      id: '6',
+      name: "Mercedes E-Class",
+      brand: "Mercedes",
+      category: "Executive Sedan",
+      type: "Sedan",
+      price: 95,
+      image: mercedesEClassImage,
+      features: ["MBUX System", "Air Suspension", "Burmester Audio", "Night Package"],
+      rating: 4.7,
+      seats: 5,
+      color: "Silver",
+      transmission: "Automatic",
+      fuelType: "Diesel",
+      year: 2024,
+      available: true
     }
   ];
+
+  // Filter cars based on search and filters
+  const filteredCars = useMemo(() => {
+    return allCars.filter(car => {
+      const matchesSearch = car.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           car.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           car.category.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesBrand = brandFilter === 'all' || car.brand === brandFilter;
+      const matchesType = typeFilter === 'all' || car.type === typeFilter;
+      const matchesSeats = seatsFilter === 'all' || car.seats.toString() === seatsFilter;
+      const matchesColor = colorFilter === 'all' || car.color === colorFilter;
+      
+      let matchesPrice = true;
+      if (priceRange !== 'all') {
+        const [min, max] = priceRange === '200+' ? [200, Infinity] : priceRange.split('-').map(Number);
+        matchesPrice = car.price >= min && (max ? car.price <= max : true);
+      }
+      
+      return matchesSearch && matchesBrand && matchesType && matchesSeats && matchesColor && matchesPrice;
+    });
+  }, [allCars, searchTerm, brandFilter, typeFilter, seatsFilter, colorFilter, priceRange]);
+
+  const clearFilters = () => {
+    setSearchTerm('');
+    setBrandFilter('all');
+    setTypeFilter('all');
+    setSeatsFilter('all');
+    setColorFilter('all');
+    setPriceRange('all');
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground font-[Inter]">
@@ -100,7 +225,7 @@ export default function Index() {
           background: 'var(--gradient-hero)',
         }}
       >
-        {/* 3D Car Scene */}
+        {/* Hero Car Image */}
         <motion.div 
           className="absolute inset-0 z-10"
           style={{ 
@@ -108,7 +233,12 @@ export default function Index() {
             rotateY: heroRotateY 
           }}
         >
-          <StudioScene3D className="w-full h-full" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/30 to-background/60" />
+          <img 
+            src={heroCarImage} 
+            alt="Luxury car"
+            className="w-full h-full object-cover object-center"
+          />
         </motion.div>
         
         {/* Hero Content */}
@@ -124,7 +254,7 @@ export default function Index() {
                 variant="secondary" 
                 className="bg-white/5 text-foreground border-border/20 backdrop-blur-sm"
               >
-                <Car className="w-4 h-4 mr-2" />
+                <CarIcon className="w-4 h-4 mr-2" />
                 Premium Car Rental
               </Badge>
               
@@ -259,69 +389,65 @@ export default function Index() {
             </p>
           </motion.div>
           
-          <div className="grid md:grid-cols-3 gap-8">
-            {cars.map((car, index) => (
-              <motion.div
-                key={car.name}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ 
-                  duration: 0.7, 
-                  delay: index * 0.1,
-                  ease: "easeOut"
-                }}
-                viewport={{ once: true }}
-                whileHover={{ y: -6, scale: 1.02 }}
-                className="group"
-              >
-                <Card className="overflow-hidden bg-card/70 backdrop-blur-sm border-border/30 rounded-[1.25rem] shadow-elegant hover:shadow-hover transition-all duration-300">
-                  <div className="aspect-video bg-gradient-to-br from-secondary via-card to-secondary/50 flex items-center justify-center text-6xl">
-                    {car.image}
-                  </div>
-                  
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-xl font-semibold">{car.name}</CardTitle>
-                      <div className="flex items-center gap-1">
-                        <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                        <span className="text-sm font-medium">{car.rating}</span>
-                      </div>
-                    </div>
-                    <CardDescription className="text-secondary-foreground">
-                      {car.category}
-                    </CardDescription>
-                  </CardHeader>
-                  
-                  <CardContent className="space-y-4">
-                    <div className="flex flex-wrap gap-2">
-                      {car.features.map((feature) => (
-                        <Badge 
-                          key={feature}
-                          variant="secondary"
-                          className="bg-white/5 text-accent border-border/20 text-xs"
-                        >
-                          {feature}
-                        </Badge>
-                      ))}
-                    </div>
-                    
-                    <div className="flex items-center justify-between pt-4">
-                      <div className="text-2xl font-bold text-primary">
-                        {car.price}
-                        <span className="text-sm font-normal text-secondary-foreground">/day</span>
-                      </div>
-                      <Button 
-                        size="sm"
-                        className="bg-primary hover:bg-primary/90 rounded-lg transition-all hover:scale-105"
-                      >
-                        Book Now
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
+          {/* Search and Filters */}
+          <motion.div 
+            className="mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            viewport={{ once: true }}
+          >
+            <CarFilters
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              brandFilter={brandFilter}
+              setBrandFilter={setBrandFilter}
+              typeFilter={typeFilter}
+              setTypeFilter={setTypeFilter}
+              seatsFilter={seatsFilter}
+              setSeatsFilter={setSeatsFilter}
+              colorFilter={colorFilter}
+              setColorFilter={setColorFilter}
+              priceRange={priceRange}
+              setPriceRange={setPriceRange}
+              onClearFilters={clearFilters}
+            />
+          </motion.div>
+
+          {/* Results count */}
+          <motion.div 
+            className="mb-8"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            viewport={{ once: true }}
+          >
+            <p className="text-secondary-foreground">
+              {filteredCars.length} car{filteredCars.length !== 1 ? 's' : ''} available
+            </p>
+          </motion.div>
+          
+          {/* Car Grid */}
+          {filteredCars.length > 0 ? (
+            <CarGrid cars={filteredCars} />
+          ) : (
+            <motion.div 
+              className="text-center py-16"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <CarIcon className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-xl font-semibold mb-2">No cars found</h3>
+              <p className="text-secondary-foreground mb-6">
+                Try adjusting your search criteria or clearing the filters.
+              </p>
+              <Button onClick={clearFilters} variant="outline">
+                Clear All Filters
+              </Button>
+            </motion.div>
+          )}
         </div>
       </section>
 
@@ -331,7 +457,7 @@ export default function Index() {
           <div className="grid md:grid-cols-4 gap-8">
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <Car className="w-8 h-8 text-primary" />
+                <CarIcon className="w-8 h-8 text-primary" />
                 <span className="text-2xl font-bold">DriveEase</span>
               </div>
               <p className="text-secondary-foreground">
