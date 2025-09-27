@@ -11,14 +11,9 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogDescription 
-} from '@/components/ui/dialog';
 import { useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 export interface Car {
   id: string;
@@ -40,14 +35,15 @@ export interface Car {
 
 interface CarGridProps {
   cars: Car[];
+  filters?: any;
 }
 
 const CARS_PER_PAGE = 6;
 
 export function CarGrid({ cars }: CarGridProps) {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedCar, setSelectedCar] = useState<Car | null>(null);
-  const [showCheckout, setShowCheckout] = useState(false);
 
   const totalPages = Math.ceil(cars.length / CARS_PER_PAGE);
   const startIndex = (currentPage - 1) * CARS_PER_PAGE;
@@ -55,15 +51,27 @@ export function CarGrid({ cars }: CarGridProps) {
   const currentCars = cars.slice(startIndex, endIndex);
 
   const handleBookNow = (car: Car) => {
-    setSelectedCar(car);
-    setShowCheckout(true);
-  };
-
-  const handleCheckout = () => {
-    // Here you would integrate with your payment system
-    alert(`Booking confirmed for ${selectedCar?.name}! Total: €${selectedCar?.price}/day`);
-    setShowCheckout(false);
-    setSelectedCar(null);
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+    
+    // Calculate dates (example: today + 1 day rental)
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() + 1);
+    const endDate = new Date();
+    endDate.setDate(endDate.getDate() + 2);
+    
+    const totalPrice = car.price * 1; // 1 day rental as default
+    
+    const searchParams = new URLSearchParams({
+      carId: car.id.toString(),
+      startDate: startDate.toISOString().split('T')[0],
+      endDate: endDate.toISOString().split('T')[0],
+      totalPrice: totalPrice.toString(),
+    });
+    
+    navigate(`/payment?${searchParams.toString()}`);
   };
 
   return (
@@ -228,77 +236,6 @@ export function CarGrid({ cars }: CarGridProps) {
           </Pagination>
         </div>
       )}
-
-      {/* Checkout Dialog */}
-      <Dialog open={showCheckout} onOpenChange={setShowCheckout}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Book Your Car</DialogTitle>
-            <DialogDescription>
-              Confirm your booking for {selectedCar?.name}
-            </DialogDescription>
-          </DialogHeader>
-          
-          {selectedCar && (
-            <div className="space-y-4">
-              <div className="aspect-video w-full overflow-hidden rounded-lg">
-                <img 
-                  src={selectedCar.image} 
-                  alt={selectedCar.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <h3 className="font-semibold text-lg">{selectedCar.name}</h3>
-                <p className="text-secondary-foreground">{selectedCar.brand} • {selectedCar.category}</p>
-                
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4" />
-                    <span>{selectedCar.seats} seats</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Palette className="w-4 h-4" />
-                    <span>{selectedCar.color}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Settings className="w-4 h-4" />
-                    <span>{selectedCar.transmission}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Fuel className="w-4 h-4" />
-                    <span>{selectedCar.fuelType}</span>
-                  </div>
-                </div>
-                
-                <div className="pt-4 border-t">
-                  <div className="flex justify-between items-center">
-                    <span className="text-lg font-semibold">Total per day:</span>
-                    <span className="text-2xl font-bold text-primary">€{selectedCar.price}</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex gap-3 pt-4">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowCheckout(false)}
-                  className="flex-1"
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  onClick={handleCheckout}
-                  className="flex-1 bg-primary hover:bg-primary/90"
-                >
-                  Confirm Booking
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
