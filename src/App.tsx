@@ -1,35 +1,34 @@
-import { Toaster } from "@/components/ui/toaster";
-import { lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/hooks/useAuth";
+import { lazy, Suspense, useEffect } from "react";
+import { BrowserRouter, Navigate, Routes, Route, useLocation } from "react-router-dom";
 import Index from "./pages/Index";
 
-const Search = lazy(() => import("./pages/Search"));
-const Auth = lazy(() => import("./pages/Auth"));
-const Payment = lazy(() => import("./pages/Payment"));
-const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
-const Booking = lazy(() => import("./pages/Booking"));
+const Fleet = lazy(() => import("./pages/Search"));
+const VehicleDetail = lazy(() => import("./pages/VehicleDetail"));
+const Confirmation = lazy(() => import("./pages/Confirmation"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const Profile = lazy(() => import("./pages/Profile"));
+
+function RouteScroll() {
+  const { pathname, hash } = useLocation();
+  useEffect(() => {
+    if (!hash) window.scrollTo(0, 0);
+  }, [pathname, hash]);
+  return null;
+}
 
 const App = () => (
-  <AuthProvider>
-    <Toaster />
-    <BrowserRouter>
-      <Suspense fallback={<div className="min-h-screen bg-black text-white flex items-center justify-center" role="status">Loading…</div>}>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/search" element={<Search />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/booking/:carId" element={<Booking />} />
-          <Route path="/payment/:bookingId" element={<Payment />} />
-          <Route path="/payment-success" element={<PaymentSuccess />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Suspense>
-    </BrowserRouter>
-  </AuthProvider>
+  <BrowserRouter>
+    <RouteScroll />
+    <Suspense fallback={<div className="route-loading" role="status">Loading the collection…</div>}>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/fleet" element={<Fleet />} />
+        <Route path="/search" element={<Navigate to="/fleet" replace />} />
+        <Route path="/cars/:slug" element={<VehicleDetail />} />
+        <Route path="/confirmation/:id" element={<Confirmation />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Suspense>
+  </BrowserRouter>
 );
 
 export default App;

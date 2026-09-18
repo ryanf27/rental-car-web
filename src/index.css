@@ -1,33 +1,14 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+:root {
+  color-scheme: dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
 
-@layer base {
-  :root {
-    --background: 0 0% 0%;
-    --foreground: 40 20% 94%;
-    --card: 0 0% 7%;
-    --card-foreground: 40 20% 94%;
-    --popover: 0 0% 8%;
-    --popover-foreground: 40 20% 94%;
-    --primary: 46 65% 52%;
-    --primary-foreground: 0 0% 3%;
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 0 0% 83%;
-    --muted: 0 0% 17%;
-    --muted-foreground: 0 0% 65%;
-    --accent: 46 65% 52%;
-    --accent-foreground: 0 0% 3%;
-    --destructive: 0 65% 50%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 21%;
-    --input: 0 0% 23%;
-    --ring: 46 65% 52%;
-    --radius: 0.35rem;
-  }
-  * { @apply border-border; }
-  html { scroll-behavior: smooth; }
-  body { @apply bg-background text-foreground; margin: 0; }
-  :focus-visible { outline: 2px solid #d4af37; outline-offset: 3px; }
-  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: #000; color: #f3f0e8; }
+button, input, select, textarea { font: inherit; }
+:focus-visible { outline: 2px solid #d4af37; outline-offset: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
 }

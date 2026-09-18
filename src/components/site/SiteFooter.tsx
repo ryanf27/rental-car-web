@@ -15,14 +15,14 @@ export function SiteFooter() {
         </div>
         <div className="footer-links">
           <span>EXPLORE</span>
-          <Link to="/search">Our fleet</Link>
+          <Link to="/fleet">Our fleet</Link>
           <Link to="/#experience">The experience</Link>
-          <Link to="/profile">My bookings</Link>
+          <Link to="/#about">About Noir</Link>
         </div>
         <div className="footer-links">
           <span>RESERVATIONS</span>
-          <Link to="/search">Find your next drive <ArrowUpRight size={14} /></Link>
-          <p>Browse live inventory and choose your dates.</p>
+          <Link to="/fleet">Find your next drive <ArrowUpRight size={14} /></Link>
+          <p>Portfolio concept. Demo inquiries only.</p>
         </div>
       </div>
       <div className="page-shell footer-bottom">

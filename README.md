@@ -1,6 +1,6 @@
 # Noir Motor Club
 
-A cinematic luxury rental car portfolio built with React, TypeScript, Vite, and Tailwind CSS. The public showroom uses local optimized imagery; the live inventory, account, reservation, and booking history routes use Supabase.
+A cinematic rental-car portfolio built with React, TypeScript, Vite, and CSS. The six-car fleet is editable in `src/data/fleet.ts`; inquiries are stored in a small libSQL database. This is a demonstration site: it does not take payments or guarantee vehicle availability.
 
 ## Local development
 
@@ -9,14 +9,17 @@ npm install
 npm run dev
 ```
 
-Copy `.env.example` to `.env` and set your Supabase project URL and publishable key. Apply the migrations in `supabase/migrations` to a new project before using the reservation flow.
+Local development uses `data/noir.db` automatically. The database and `inquiries` table are created on the first request. To use Turso locally, copy `.env.example` to `.env` and set `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN`. Never prefix these server credentials with `VITE_`.
+
+## Deploy to Vercel
+
+Import the repository as a Vite project. Set `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` in the Vercel project environment. The `/api/inquiries` function creates the schema when first called and writes validated inquiries. The fleet is maintained in source control and needs no database seed command. Static route rewrites are in `vercel.json`.
 
 ## Checks
 
 ```bash
 npm run lint
 npm run typecheck
+npm test
 npm run build
 ```
-
-The checkout screen is a demonstration flow and does not charge a payment method. Connect a payment provider and server-side confirmation before accepting real reservations.

@@ -1,24 +1,24 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ArrowDown, ArrowRight, ArrowUpRight, Check, Clock3, KeyRound, ShieldCheck, Sparkles } from "lucide-react";
-import { showcaseFleet, type Category } from "@/data/fleet";
+import { ArrowDown, ArrowRight, ArrowUpRight, CalendarDays, Check, Clock3, KeyRound, ShieldCheck, Sparkles } from "lucide-react";
+import { fleet, type Category } from "@/data/fleet";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { VehicleCard } from "@/components/site/VehicleCard";
 import "@/portfolio.css";
 
-const categories: Array<Category | "All"> = ["All", "Supercar", "Luxury", "Sport", "SUV"];
+const categories: Array<Category | "All"> = ["All", "Supercar", "Luxury", "Sports", "SUV"];
 const categoryDetails = [
   ["01", "Supercar", "Unfiltered exhilaration."],
   ["02", "Luxury", "Quiet confidence, everywhere."],
-  ["03", "Sport", "Built for the open road."],
+  ["03", "Sports", "Built for the open road."],
   ["04", "SUV", "Room to move differently."],
 ] as const;
 
 export default function Index() {
   const { hash } = useLocation();
   const [category, setCategory] = useState<Category | "All">("All");
-  const visibleCars = category === "All" ? showcaseFleet : showcaseFleet.filter((car) => car.category === category);
+  const visibleCars = category === "All" ? fleet.filter((car) => car.featured) : fleet.filter((car) => car.category === category);
 
   useEffect(() => {
     if (!hash) return;
@@ -34,15 +34,15 @@ export default function Index() {
           <div className="hero__shade" />
           <div className="page-shell hero__content">
             <p className="eyebrow hero__eyebrow">
-              <span className="gold-line" /> THE ART OF ARRIVING</p>
-            <h1 id="hero-title">Luxury without limits.<br />
-              <em>Drive the extraordinary.</em>
+              <span className="gold-line" /> PREMIUM CAR RENTAL</p>
+            <h1 id="hero-title">Drive beyond<br />
+              <em>ordinary.</em>
             </h1>
-            <p className="hero__intro">Exceptional machines. Impeccable service. Every journey deserves to feel unforgettable.</p>
+            <p className="hero__intro">Experience a curated fleet of high-performance and luxury vehicles built for unforgettable drives.</p>
             <div className="hero__actions">
-              <a className="button-gold" href="#fleet">Explore the fleet <ArrowUpRight size={18} />
+              <a className="button-gold" href="#fleet">Explore fleet <ArrowUpRight size={18} />
               </a>
-              <Link className="button-outline" to="/search">Book a car <ArrowRight size={18} />
+              <Link className="button-outline" to="/fleet">Book your drive <ArrowRight size={18} />
               </Link>
             </div>
           </div>
@@ -78,11 +78,11 @@ export default function Index() {
           </div>
           <div className="fleet-toolbar">
             <div className="category-tabs" role="group" aria-label="Filter by vehicle category">{categories.map((item) => <button key={item} type="button" className={category === item ? "active" : ""} aria-pressed={category === item} onClick={() => setCategory(item)}>{item}</button>)}</div>
-            <Link to="/search" className="text-link">View live inventory <ArrowUpRight size={17} />
+            <Link to="/fleet" className="text-link">View full collection <ArrowUpRight size={17} />
             </Link>
           </div>
-          <div className="fleet-grid">{visibleCars.map((car) => <VehicleCard key={car.name} car={car} index={showcaseFleet.indexOf(car)} />)}</div>
-          <p className="fleet-note">Showcase models and rates are illustrative. Live availability and final pricing are shown during reservation.</p>
+          <div className="fleet-grid">{visibleCars.map((car) => <VehicleCard key={car.slug} car={car} index={fleet.indexOf(car)} />)}</div>
+          <p className="fleet-note">Portfolio collection and rates are illustrative. Send an inquiry to request your dates.</p>
         </section>
 
         <section className="categories-section" aria-labelledby="categories-title">
@@ -116,7 +116,7 @@ export default function Index() {
           </div>
         </section>
 
-        <section className="section experience-section page-shell" id="experience" aria-labelledby="experience-title">
+        <section className="section experience-section page-shell" id="about" aria-labelledby="experience-title">
           <div className="experience-image">
             <img src="/fleet/graphite-gt.webp" alt="Graphite sports coupe under showroom lighting" loading="lazy" decoding="async" />
             <span>THE NOIR STANDARD / 001</span>
@@ -151,18 +151,18 @@ export default function Index() {
                 </div>
               </div>
             </div>
-            <Link className="text-link" to="/search">Find your next drive <ArrowUpRight size={18} />
+            <Link className="text-link" to="/fleet">Find your next drive <ArrowUpRight size={18} />
             </Link>
           </div>
         </section>
 
-        <section className="process-section" aria-labelledby="process-title">
+        <section className="process-section" id="experience" aria-labelledby="process-title">
           <div className="page-shell">
             <div className="section-heading">
               <div>
                 <p className="eyebrow">
                   <span className="gold-line" /> THE EXPERIENCE</p>
-                <h2 id="process-title">The road is yours <em>in three steps.</em>
+                <h2 id="process-title">The road is yours <em>in four steps.</em>
                 </h2>
               </div>
             </div>
@@ -175,15 +175,21 @@ export default function Index() {
               </article>
               <article>
                 <span>02</span>
-                <Check size={27} />
-                <h3>Reserve with ease</h3>
-                <p>Select your dates and review the details before confirming.</p>
+                <CalendarDays size={27} />
+                <h3>Select your dates</h3>
+                <p>Choose the days that turn an ordinary trip into an occasion.</p>
               </article>
               <article>
                 <span>03</span>
+                <Check size={27} />
+                <h3>Send your request</h3>
+                <p>Share your details in a short, clear inquiry.</p>
+              </article>
+              <article>
+                <span>04</span>
                 <ArrowRight size={27} />
-                <h3>Take the wheel</h3>
-                <p>Arrive, collect your keys, and make the road your own.</p>
+                <h3>Drive</h3>
+                <p>Make the journey part of the destination.</p>
               </article>
             </div>
           </div>
@@ -197,22 +203,22 @@ export default function Index() {
                 <span className="gold-line" /> THE SIGNATURE DRIVE</p>
               <h2 id="feature-title">A presence<br />you can <em>feel.</em>
               </h2>
-              <p>Meet the Apex V12: sculpted to turn every arrival into an occasion. A commanding silhouette and uncompromising performance define the collection’s most exhilarating statement.</p>
+              <p>Meet the Porsche 911 Turbo S. An unmistakable silhouette and extraordinary composure make every mile feel like the reason for the journey.</p>
               <div className="feature-specs">
                 <div>
-                  <strong>720</strong>
+                  <strong>640</strong>
                   <span>HORSEPOWER</span>
                 </div>
                 <div>
-                  <strong>2</strong>
-                  <span>SEATS</span>
+                  <strong>AWD</strong>
+                  <span>DRIVETRAIN</span>
                 </div>
                 <div>
-                  <strong>V12</strong>
-                  <span>ENGINE</span>
+                  <strong>4</strong>
+                  <span>SEATS</span>
                 </div>
               </div>
-              <Link className="button-outline" to="/search">Explore availability <ArrowUpRight size={18} />
+              <Link className="button-outline" to="/cars/porsche-911-turbo-s">Discover the car <ArrowUpRight size={18} />
               </Link>
             </div>
           </div>
@@ -223,7 +229,7 @@ export default function Index() {
           <h2 id="booking-title">Make the journey <em>the destination.</em>
           </h2>
           <p>Reserve your next extraordinary drive.</p>
-          <Link className="button-gold" to="/search">Explore live availability <ArrowUpRight size={18} />
+          <Link className="button-gold" to="/fleet">Explore the collection <ArrowUpRight size={18} />
           </Link>
         </section>
       </main>
