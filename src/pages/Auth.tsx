@@ -1,14 +1,17 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { supabase } from "@/integrations/supabase/client";
+import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Mail, Lock, User, Phone } from "lucide-react";
 import { z } from "zod";
+import { SiteHeader } from "@/components/site/SiteHeader";
+import { SiteFooter } from "@/components/site/SiteFooter";
+import "@/portfolio.css";
 
 const signUpSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -25,17 +28,21 @@ const signInSchema = z.object({
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const requestedPath = params.get("returnTo");
+  const returnTo = requestedPath?.startsWith("/") && !requestedPath.startsWith("//") ? requestedPath : "/";
   const { toast } = useToast();
 
   useEffect(() => {
+    if (!isSupabaseConfigured) return;
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
-        navigate("/");
+        navigate(returnTo);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, returnTo]);
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -124,7 +131,7 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20 flex items-center justify-center p-4">
+    <div className="portfolio-site"><SiteHeader /><main className="auth-page">
       <div className="w-full max-w-md space-y-6">
         <div className="flex items-center gap-4 mb-8">
           <Button
@@ -137,20 +144,21 @@ export default function Auth() {
           </Button>
           <div>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              CarRental Pro
+              Noir Motor Club
             </h1>
-            <p className="text-muted-foreground">Join us today</p>
+            <p className="text-muted-foreground">Your next drive starts here</p>
           </div>
         </div>
 
         <Card className="bg-card/50 backdrop-blur-sm border-border/50">
           <CardHeader>
-            <CardTitle>Welcome Back</CardTitle>
+            <CardTitle>Welcome to Noir</CardTitle>
             <CardDescription>
-              Sign in to your account or create a new one to start booking cars
+              Sign in or create an account to reserve your next drive
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {!isSupabaseConfigured && <p className="text-sm text-muted-foreground mb-5" role="status">Online account access is temporarily unavailable.</p>}
             <Tabs defaultValue="signin" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="signin">Sign In</TabsTrigger>
@@ -190,7 +198,7 @@ export default function Auth() {
                   <Button 
                     type="submit" 
                     className="w-full" 
-                    disabled={isLoading}
+                    disabled={isLoading || !isSupabaseConfigured}
                   >
                     {isLoading ? "Signing in..." : "Sign In"}
                   </Button>
@@ -257,7 +265,7 @@ export default function Auth() {
                   <Button 
                     type="submit" 
                     className="w-full" 
-                    disabled={isLoading}
+                    disabled={isLoading || !isSupabaseConfigured}
                   >
                     {isLoading ? "Creating account..." : "Sign Up"}
                   </Button>
@@ -267,6 +275,6 @@ export default function Auth() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </main><SiteFooter /></div>
   );
 }

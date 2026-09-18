@@ -14,7 +14,7 @@ interface BookingConfirmationRequest {
     id: number;
     start_date: string;
     end_date: string;
-    total_price: string;
+    total_price: string | number;
     status: string;
   };
   car: {
@@ -23,7 +23,7 @@ interface BookingConfirmationRequest {
     year: number;
     seats: number;
     transmission: string;
-    price_per_day: string;
+    price_per_day: string | number;
   };
   user: {
     email: string;
@@ -59,7 +59,7 @@ const handler = async (req: Request): Promise<Response> => {
     const days = Math.ceil((new Date(booking.end_date).getTime() - new Date(booking.start_date).getTime()) / (1000 * 60 * 60 * 24));
 
     const emailResponse = await resend.emails.send({
-      from: "CarRental Pro <onboarding@resend.dev>",
+      from: "Noir Motor Club <onboarding@resend.dev>",
       to: [user.email],
       subject: `Booking Confirmation - ${car.brand} ${car.model}`,
       html: `
@@ -70,9 +70,9 @@ const handler = async (req: Request): Promise<Response> => {
           <title>Booking Confirmation</title>
           <style>
             body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+            .header { background: linear-gradient(135deg, #121212, #28251a); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
             .content { background: #f8fafc; padding: 30px; border-radius: 0 0 8px 8px; }
-            .car-details { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #3b82f6; }
+            .car-details { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #d4af37; }
             .booking-details { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
             .status-confirmed { background: #dcfce7; color: #166534; padding: 15px; border-radius: 8px; text-align: center; font-weight: bold; }
             .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; color: #666; }
@@ -122,7 +122,7 @@ const handler = async (req: Request): Promise<Response> => {
                 </tr>
                 <tr>
                   <td class="label">Total Amount:</td>
-                  <td class="price-highlight">$${parseFloat(booking.total_price).toFixed(2)}</td>
+                  <td class="price-highlight">$${Number(booking.total_price).toFixed(2)}</td>
                 </tr>
               </table>
             </div>
@@ -138,13 +138,13 @@ const handler = async (req: Request): Promise<Response> => {
             </div>
             
             <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
-              <h4>📞 Need to modify or cancel?</h4>
-              <p>Contact our support team at <a href="mailto:support@carrental.com">support@carrental.com</a> or call us at (555) 123-4567</p>
+              <h4>Need to cancel?</h4>
+              <p>Visit your account to review the reservation and cancel if eligible.</p>
             </div>
           </div>
           
           <div class="footer">
-            <p>Thank you for choosing CarRental Pro!</p>
+            <p>Thank you for choosing Noir Motor Club.</p>
             <p>Drive safe and enjoy your journey 🚗💨</p>
             <p style="font-size: 12px; color: #888;">
               This is an automated confirmation email. Please do not reply directly to this message.
@@ -164,10 +164,10 @@ const handler = async (req: Request): Promise<Response> => {
         ...corsHeaders,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error in send-booking-confirmation function:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error instanceof Error ? error.message : "Unable to send confirmation" }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },

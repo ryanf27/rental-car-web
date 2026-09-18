@@ -1,27 +1,21 @@
-import { useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import { Link } from "react-router-dom";
+import { ArrowUpRight } from "lucide-react";
+import { SiteHeader } from "@/components/site/SiteHeader";
+import { SiteFooter } from "@/components/site/SiteFooter";
+import "@/portfolio.css";
 
-const NotFound = () => {
-  const location = useLocation();
-
-  useEffect(() => {
-    console.error(
-      "404 Error: User attempted to access non-existent route:",
-      location.pathname
-    );
-  }, [location.pathname]);
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">404</h1>
-        <p className="text-xl text-gray-600 mb-4">Oops! Page not found</p>
-        <a href="/" className="text-blue-500 hover:text-blue-700 underline">
-          Return to Home
-        </a>
-      </div>
-    </div>
-  );
-};
-
-export default NotFound;
+export default function NotFound() {
+  return <div className="portfolio-site">
+    <SiteHeader />
+    <main className="page-shell not-found">
+      <p className="eyebrow">
+        <span className="gold-line" /> OFF ROUTE</p>
+      <h1>Road <em>not found.</em>
+      </h1>
+      <p>That page isn't on the map. The collection is just a turn away.</p>
+      <Link className="button-gold" to="/">Return home <ArrowUpRight size={18} />
+      </Link>
+    </main>
+    <SiteFooter />
+  </div>;
+}
